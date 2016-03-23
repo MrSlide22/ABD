@@ -2,6 +2,7 @@ package p1admin.adminDB;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -15,7 +16,7 @@ public class OpcionMapper extends AbstractMapper<Opcion, Integer> {
 
 	@Override
 	protected String getTableName() {
-		return "pregunta";
+		return "opcion";
 	}
 
 	@Override
@@ -50,11 +51,17 @@ public class OpcionMapper extends AbstractMapper<Opcion, Integer> {
 
 	@Override
 	protected Object[] decomposeObject(Opcion object) {
-		return new Object[] { object.getId(), object.getNumeroOrden(), object.getTexto() };
+		return new Object[] { object.getId(), object.getNumeroOrden(), object.getTexto(),
+				object.getPreguntaMadre().getId() };
 	}
 
 	@Override
 	protected Integer getKey(Opcion object) {
 		return object.getId();
+	}
+
+	@Override
+	protected void setKey(Opcion o, List<Object> keys) {
+		o.setId((int) (long) keys.get(0));
 	}
 }

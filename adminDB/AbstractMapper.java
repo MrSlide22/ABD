@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -15,6 +17,7 @@ public abstract class AbstractMapper<T, K> {
 
 	/**
 	 * Obtiene el nombre de la tabla que maneja el Mapper.
+	 * 
 	 * @return Nombre de tabla
 	 */
 	protected abstract String getTableName();
@@ -22,8 +25,8 @@ public abstract class AbstractMapper<T, K> {
 	/**
 	 * Obtiene el nombre de las columnas de la tabla que conforman la clave
 	 *
-	 * @return Array con los nombres de las columnas clave de la tabla. Si
-	 *   la clave es simple, tan sólo contiene un componente.
+	 * @return Array con los nombres de las columnas clave de la tabla. Si la
+	 *         clave es simple, tan sólo contiene un componente.
 	 */
 	protected abstract String[] getKeyColumnNames();
 
@@ -37,54 +40,61 @@ public abstract class AbstractMapper<T, K> {
 	/**
 	 * Construye un objeto T consultando un ResultSet
 	 * 
-	 * @param rs ResultSet a consultar. No debe cerrarse.
+	 * @param rs
+	 *            ResultSet a consultar. No debe cerrarse.
 	 * @return Objeto de la clase que maneja el Mapper (T)
 	 * @throws SQLException
 	 */
 	protected abstract T buildObjectFromResultSet(ResultSet rs) throws SQLException;
-	
+
 	/**
 	 * Descompone una clave simple o compuesta en unos componentes.
 	 * 
-	 * @param key Clave a descomponer
-	 * @return Array con las componentes de la clave. Si la clave es simple,
-	 * se devolverá un array unitario. El orden en el que se devuelven las
-	 * componentes ha de coincidir con el orden dispuesto por el resultado
-	 * de getKeyColumnNames()
+	 * @param key
+	 *            Clave a descomponer
+	 * @return Array con las componentes de la clave. Si la clave es simple, se
+	 *         devolverá un array unitario. El orden en el que se devuelven las
+	 *         componentes ha de coincidir con el orden dispuesto por el
+	 *         resultado de getKeyColumnNames()
 	 */
 	protected abstract Object[] decomposeKey(K key);
-	
+
 	/**
 	 * Construye un objeto a partir de sus componentes.
 	 * 
-	 * @param o Componentes del objeto a componer. Las componentes
-	 * van ordenadas según las columnas devueltas por getColumnNames().
-	 *  
+	 * @param o
+	 *            Componentes del objeto a componer. Las componentes van
+	 *            ordenadas según las columnas devueltas por getColumnNames().
+	 * 
 	 * @return Objeto de la clase que maneja el mapper (T)
 	 */
 	protected abstract T buildObject(Object[] o);
-	
+
 	/**
 	 * Descompone un objeto a partir de sus componentes.
 	 * 
-	 * @param object Objeto a descomponer
+	 * @param object
+	 *            Objeto a descomponer
 	 * @return Array con las componentes del objeto. Han de estar en el orden
-	 * especificado por el resultado de la función getColumnNames().
+	 *         especificado por el resultado de la función getColumnNames().
 	 */
 	protected abstract Object[] decomposeObject(T object);
-	
+
 	/**
 	 * Dado un objeto, devuelve su clave.
 	 * 
-	 * @param object Objeto a consultar
+	 * @param object
+	 *            Objeto a consultar
 	 * @return Clave del objeto consultado.
 	 */
 	protected abstract K getKey(T object);
 
+	protected abstract void setKey(T o, List<Object> keys);
+
 	//
 	// Añade los métodos abstractos que consideres necesarios.
-	// 
-	
+	//
+
 	public AbstractMapper(DataSource ds) {
 		this.ds = ds;
 		this.da = new DataAccessor(ds);
@@ -93,33 +103,29 @@ public abstract class AbstractMapper<T, K> {
 	/**
 	 * Obtiene un objeto de la BD a partir de su clave.
 	 * 
-	 * @param id Clave del objeto a buscar
-	 * @return El objeto recuperado de la BD, o null si el objeto no se ha encontrado
+	 * @param id
+	 *            Clave del objeto a buscar
+	 * @return El objeto recuperado de la BD, o null si el objeto no se ha
+	 *         encontrado
 	 */
 	public T findById(K id) {
 		String[] columnNames = getColumnNames();
 		String[] keyColumnNames = getKeyColumnNames();
-		
+
 		String[] keyConditions = new String[keyColumnNames.length];
 		for (int i = 0; i < keyConditions.length; i++) {
 			keyConditions[i] = keyColumnNames[i] + " = ?";
 		}
-		
-		
-		String sql = "SELECT "
-				+ String.join(", ", columnNames)
-				+ " FROM "
-				+ getTableName()
-				+ " WHERE "
+
+		String sql = "SELECT " + String.join(", ", columnNames) + " FROM " + getTableName() + " WHERE "
 				+ String.join(" AND ", keyConditions);
-		try (Connection con = ds.getConnection();
-			 PreparedStatement st = con.prepareStatement(sql)) {
-			
+		try (Connection con = ds.getConnection(); PreparedStatement st = con.prepareStatement(sql)) {
+
 			Object[] decKey = decomposeKey(id);
 			for (int i = 0; i < keyColumnNames.length; i++) {
 				st.setObject(i + 1, decKey[i]);
 			}
-					
+
 			try (ResultSet rs = st.executeQuery()) {
 				if (rs.next()) {
 					return buildObjectFromResultSet(rs);
@@ -127,23 +133,22 @@ public abstract class AbstractMapper<T, K> {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} 
+		}
 		return null;
 	}
-	
+
 	/*
 	 * Realiza la misma función que findById, pero utilizando un Data Accessor
 	 */
 	public T findByIdDataAccessor(K id) {
 		String[] columnNames = getKeyColumnNames();
 		Object[] keyDec = decomposeKey(id);
-		
+
 		QueryCondition[] conditions = new QueryCondition[columnNames.length];
 		for (int i = 0; i < conditions.length; i++) {
-			conditions[i] = new QueryCondition(columnNames[i],
-					QueryOperator.EQ, keyDec[i]);
+			conditions[i] = new QueryCondition(columnNames[i], QueryOperator.EQ, keyDec[i]);
 		}
-		
+
 		List<Object[]> rows = da.query(getTableName(), getColumnNames(), conditions);
 		if (rows.isEmpty()) {
 			return null;
@@ -152,19 +157,55 @@ public abstract class AbstractMapper<T, K> {
 			return buildObject(row);
 		}
 	}
-	
+
 	public boolean insert(T o) {
-		return this.da.insertRow(this.getTableName(), this.getColumnNames(), this.decomposeObject(o));
+		List<Object> keys = this.da.insertRow(this.getTableName(), this.getColumnNames(), this.decomposeObject(o));
+
+		if (keys == null) {
+			return false;
+		}
+
+		this.setKey(o, keys);
+
+		return true;
 	}
-	
+
 	public boolean update(T o) {
-		return this.da.updateRows(this.getTableName(), this.getKeyColumnNames(),
-				this.decomposeKey(this.getKey(o)), this.getColumnNames(),
-				this.decomposeObject(o));
+		return this.da.updateRows(this.getTableName(), this.getKeyColumnNames(), this.decomposeKey(this.getKey(o)),
+				this.getColumnNames(), this.decomposeObject(o));
 	}
-	
+
 	public boolean delete(T o) {
-		return this.da.deleteRows(this.getTableName(), this.getKeyColumnNames(),
-				this.decomposeKey(this.getKey(o)));
+		return this.da.deleteRows(this.getTableName(), this.getKeyColumnNames(), this.decomposeKey(this.getKey(o)));
+	}
+
+	public LinkedList<T> selectLikeOperator(T p, QueryOperator op) {
+
+		Object[] fields = this.decomposeObject(p);
+		ArrayList<QueryCondition> conds = new ArrayList<QueryCondition>();
+
+		int i = 0;
+		int ncond = 0;
+		for (Object field : fields) {
+			if (field != null) {
+				if (op == QueryOperator.LIKE) {
+					conds.add(new QueryCondition(this.getColumnNames()[i], op, "%" + field + "%"));
+				} else {
+					conds.add(new QueryCondition(this.getColumnNames()[i], op, field));
+				}
+				ncond++;
+			}
+			i++;
+		}
+
+		List<Object[]> result = this.da.query(this.getTableName(), this.getColumnNames(),
+				conds.toArray(new QueryCondition[ncond]));
+		LinkedList<T> ret = new LinkedList<T>();
+
+		for (Object[] res : result) {
+			ret.add(this.buildObject(res));
+		}
+
+		return ret;
 	}
 }

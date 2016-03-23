@@ -1,18 +1,14 @@
 package p1admin.model;
 
-public class Opcion {
-<<<<<<< HEAD
+public class Opcion implements Comparable<Opcion>{
 	private Integer id;
-=======
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	private Pregunta preguntaMadre;
-	private int numeroOrden;
+	private Integer numeroOrden;
 	private String texto;
 	
 	public Opcion() {
-		
+		this.preguntaMadre = null;
 	}
-<<<<<<< HEAD
 	
 	public Opcion(int id, int orden, String texto){
 		this.id = id;
@@ -21,15 +17,13 @@ public class Opcion {
 		this.preguntaMadre = null;
 	}
 
-	public int getId() {
+	public Integer getId() {
 		return id;
 	}
 
 	public void setId(int id) {
 		this.id = id;
 	}
-=======
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 
 	public Pregunta getPreguntaMadre() {
 		return preguntaMadre;
@@ -39,11 +33,11 @@ public class Opcion {
 		this.preguntaMadre = preguntaMadre;
 	}
 
-	public int getNumeroOrden() {
+	public Integer getNumeroOrden() {
 		return numeroOrden;
 	}
 
-	public void setNumeroOrden(int numeroOrden) {
+	public void setNumeroOrden(Integer numeroOrden) {
 		this.numeroOrden = numeroOrden;
 	}
 
@@ -57,10 +51,11 @@ public class Opcion {
 	
 	@Override
 	public String toString() {
-<<<<<<< HEAD
-=======
-		// TODO Auto-generated method stub
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 		return "(" + numeroOrden + ") " + texto;
+	}
+
+	@Override
+	public int compareTo(Opcion arg0) {
+		return this.getNumeroOrden() - arg0.getNumeroOrden();
 	}
 }

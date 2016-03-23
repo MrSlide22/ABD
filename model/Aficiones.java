@@ -5,6 +5,10 @@ public class Aficiones {
 	private Usuario usuarioPadre;
 	private String aficion;
 	
+	public Aficiones(){
+		this.usuarioPadre = null;
+	}
+	
 	public Aficiones(Usuario usuarioPadre, String aficion) {
 		super();
 		this.usuarioPadre = usuarioPadre;

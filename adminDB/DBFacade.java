@@ -1,13 +1,10 @@
 package p1admin.adminDB;
 
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
-<<<<<<< HEAD
 import javax.sql.DataSource;
 
-=======
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 import p1admin.model.Opcion;
 import p1admin.model.Pregunta;
 
@@ -21,7 +18,6 @@ import p1admin.model.Pregunta;
  * 
  */
 public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
-<<<<<<< HEAD
 
 	private DataSource ds;
 
@@ -32,22 +28,12 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	public DBFacade(DataSource ds) {
 		this.ds = ds;
 	}
-=======
-	// TODO Introduce los atributos que sean necesarios.
-
-	// TODO Si es necesario, añade el constructor que inicialice esos atributos.
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 
 	/**
 	 * Inserta una pregunta en la base de datos.
 	 * 
-<<<<<<< HEAD
 	 * Esta función no tiene que guardar las opciones de la pregunta en la base
 	 * de datos.
-=======
-	 * Esta función no tiene que guardar las opciones de la pregunta
-	 * en la base de datos.
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	 * 
 	 * Esta función es llamada cuando el usuario hace clic en el botón
 	 * {@code Añadir Pregunta}, justo tras introducir el enunciado de la misma.
@@ -58,13 +44,9 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	@Override
 	public void insertQuestion(Pregunta question) {
 		System.out.println("Insertar pregunta en BD: " + question);
-<<<<<<< HEAD
 
 		PreguntaMapper pMap = new PreguntaMapper(this.ds);
 		pMap.insert(question);
-=======
-		// TODO Implementar
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	}
 
 	/**
@@ -75,28 +57,27 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	 * en el botón {@code Filtrar} tras introducir la cadena vacía en el cuadro
 	 * de texto correspondiente.
 	 * 
-<<<<<<< HEAD
 	 * <b>Importante:</b> Esta función también ha de recuperar de la BD las
 	 * opciones asociadas a cada pregunta.
-=======
-	 * <b>Importante:</b> Esta función también ha de recuperar de la BD
-	 * las opciones asociadas a cada pregunta.
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	 * 
 	 * @return Una lista con todas las preguntas de la base de datos
 	 */
 	@Override
 	public List<Pregunta> getAllQuestions() {
 		System.out.println("Obtener todas las preguntas de la BD");
-<<<<<<< HEAD
-		
+
 		PreguntaMapper pMap = new PreguntaMapper(ds);
-		
-		return pMap.selectAll();
-=======
-		// TODO Implementar
-		return new LinkedList<>();
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
+		OpcionMapper opMap = new OpcionMapper(ds);
+
+		List<Pregunta> preguntas = pMap.selectAll();
+		for (Pregunta p : preguntas) {
+			Opcion op = new Opcion();
+			op.setPreguntaMadre(p);
+			List<Opcion> opciones = opMap.selectLikeOperator(op, QueryOperator.EQ);
+			Collections.sort(opciones);
+			p.setOpciones(opciones);
+		}
+		return preguntas;
 	}
 
 	/**
@@ -106,13 +87,8 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	 * Esta función es llamada cuando el usuario pulsa el botón {@code Filtrar}
 	 * tras haber introducido una cadena de texto en el cuadro correspondiente.
 	 *
-<<<<<<< HEAD
 	 * <b>Importante:</b> Esta función también ha de recuperar de la BD las
 	 * opciones asociadas a cada pregunta devuelta.
-=======
-	 * <b>Importante:</b> Esta función también ha de recuperar de la BD
-	 * las opciones asociadas a cada pregunta devuelta.
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	 * 
 	 * @param text
 	 *            Texto que ha de aparecer en las respuestas devueltas.
@@ -122,15 +98,10 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	@Override
 	public List<Pregunta> findQuestionsContaining(String text) {
 		System.out.println("Búsqueda de preguntas que contienen: " + text);
-		// TODO implementar
-<<<<<<< HEAD
 		Pregunta p = new Pregunta();
 		p.setEnunciado(text);
 		PreguntaMapper pMap = new PreguntaMapper(ds);
-		pMap.selectLike(p);
-=======
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
-		return new LinkedList<>();
+		return pMap.selectLikeOperator(p, QueryOperator.LIKE);
 	}
 
 	/**
@@ -151,7 +122,8 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	@Override
 	public void updateQuestion(Pregunta question) {
 		System.out.println("Actualizar pregunta: " + question);
-		// TODO Implementar
+		PreguntaMapper pMap = new PreguntaMapper(ds);
+		pMap.update(question);
 	}
 
 	/**
@@ -172,8 +144,9 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	@Override
 	public void updateAnswer(Pregunta question, Opcion answer) {
 		System.out.println("Actualizar opción " + answer);
-		// TODO Implementar
-
+		answer.setPreguntaMadre(question);
+		OpcionMapper opMap = new OpcionMapper(ds);
+		opMap.update(answer);
 	}
 
 	/**
@@ -191,7 +164,8 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	@Override
 	public void deleteAnswer(Pregunta question, Opcion answer) {
 		System.out.println("Eliminar opción " + answer);
-		// TODO Implementar
+		OpcionMapper opMap = new OpcionMapper(ds);
+		opMap.delete(answer);
 	}
 
 	/**
@@ -201,13 +175,8 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	 * {@code Eliminar pregunta} tras seleccionar una pregunta en la lista
 	 * principal.
 	 * 
-<<<<<<< HEAD
 	 * Esta función <b>sí</b> ha de eliminar la lista de respuestas asociadas a
 	 * la pregunta.
-=======
-	 * Esta función <b>sí</b> ha de eliminar la lista de respuestas asociadas
-	 * a la pregunta.
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	 * 
 	 * @param question
 	 *            Pregunta a eliminar.
@@ -215,13 +184,21 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	@Override
 	public void deleteQuestion(Pregunta question) {
 		System.out.println("Eliminar pregunta " + question);
-<<<<<<< HEAD
-		
+
 		PreguntaMapper pMap = new PreguntaMapper(this.ds);
+
+		// Al tener en la base de datos "ON DELETE CASCADE" para
+		// las preguntas esto no sería necesario. Lo dejamos porque
+		// lo pone explícitamente en el comentario
+		OpcionMapper opMap = new OpcionMapper(ds);
+		Opcion op = new Opcion();
+		op.setPreguntaMadre(question);
+		List<Opcion> opciones = opMap.selectLikeOperator(op, QueryOperator.EQ);
+		for (Opcion o : opciones) {
+			opMap.delete(o);
+		}
+
 		pMap.delete(question);
-=======
-		// TODO Implementar
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	}
 
 	/**
@@ -238,6 +215,8 @@ public class DBFacade implements GenericDBFacade<Pregunta, Opcion> {
 	@Override
 	public void insertAnswer(Pregunta question, Opcion answer) {
 		System.out.println("Insertar " + answer);
-		// TODO Implementar
+		answer.setPreguntaMadre(question);
+		OpcionMapper opMap = new OpcionMapper(ds);
+		opMap.insert(answer);
 	}
 }

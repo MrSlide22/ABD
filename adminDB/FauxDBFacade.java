@@ -5,11 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-<<<<<<< HEAD
-import javax.sql.DataSource;
-
-=======
->>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 import p1admin.model.Opcion;
 import p1admin.model.Pregunta;
 
