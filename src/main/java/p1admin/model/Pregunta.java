@@ -9,6 +9,7 @@ public class Pregunta {
 	private List<Opcion> opciones;
 	
 	public Pregunta() {
+<<<<<<< HEAD
 		this.opciones = new ArrayList<>();
 	}
 	
@@ -16,6 +17,9 @@ public class Pregunta {
 		this.id = id;
 		this.enunciado = enunciado;
 		this.opciones = new ArrayList<>();
+=======
+		opciones = new ArrayList<>();
+>>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	}
 
 	public Integer getId() {

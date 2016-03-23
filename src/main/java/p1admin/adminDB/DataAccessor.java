@@ -1,5 +1,6 @@
 package p1admin.adminDB;
 
+<<<<<<< HEAD
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -97,6 +98,48 @@ public class DataAccessor {
 	}
 
 	public boolean updateRows(String tableName, String[] keys, Object[] vals, String[] fields, Object[] newVals) {
+=======
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+
+import javax.sql.DataSource;
+
+import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.PreparedStatement;
+
+public class DataAccessor {
+
+	private DataSource ds;
+
+	public DataAccessor(DataSource ds) {
+		super();
+		this.ds = ds;
+	}
+
+	public boolean insertRow(String tableName, String[] fields, Object[] values) {
+
+		String sql = generateInsertStatement(tableName, fields);
+
+		try (Connection con = (Connection) ds.getConnection();
+
+				PreparedStatement pst = (PreparedStatement) con.prepareStatement(sql)) {
+
+			for (int i = 0; i < values.length; i++) {
+				pst.setObject(i + 1, values[i]);
+			}
+
+			int numRows = pst.executeUpdate();
+			return (numRows == 1);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean updateRows(String tableName, String[] keys, String[] vals, String[] fields, Object[] newVals) {
+>>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 
 		String sql = generateUpdateStatement(tableName, keys, fields);
 
@@ -121,10 +164,17 @@ public class DataAccessor {
 		}
 	}
 
+<<<<<<< HEAD
 	public boolean deleteRows(String tableName, String[] keys, Object[] vals) {
 
 		String sql = generateDeleteStatement(tableName, keys);
 		System.out.println(sql);
+=======
+	public boolean deleteRows(String tableName, String[] keys, String[] vals) {
+
+		String sql = generateDeleteStatement(tableName, keys);
+
+>>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 		try (Connection con = (Connection) ds.getConnection();
 
 				PreparedStatement pst = (PreparedStatement) con.prepareStatement(sql)) {
@@ -142,6 +192,7 @@ public class DataAccessor {
 		}
 	}
 
+<<<<<<< HEAD
 	private String generateSelectStatement(String tableName, String[] columns, QueryCondition[] conditions) {
 		String[] conditionStrings = new String[conditions.length];
 
@@ -159,11 +210,40 @@ public class DataAccessor {
 			sql += " WHERE " + String.join(" AND ", conditionStrings);
 		}
 		return sql;
+=======
+	public ResultSet selectRows(String tableName, String[] keys, Object[] vals) {
+	
+		String sql = generateSelectStatement(tableName, keys);
+
+		try (Connection con = (Connection) ds.getConnection();
+
+				PreparedStatement pst = (PreparedStatement) con.prepareStatement(sql)) {
+
+			for (int i = 0; i < vals.length; i++) {
+				pst.setObject(i + 1, vals[i]);
+			}
+
+			return pst.executeQuery();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private String generateSelectStatement(String tableName, String[] keys) {
+		String keyList = String.join(" = ? AND ", keys) + " = ?";
+		return "SELECT * FROM " + tableName + " WHERE " + keyList;
+>>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	}
 
 	private String generateDeleteStatement(String tableName, String[] keys) {
 		String keyList = String.join(" = ? AND ", keys) + " = ?";
+<<<<<<< HEAD
 		return "DELETE FROM " + tableName + " WHERE " + keyList;
+=======
+		return "DELETE " + tableName + " WHERE " + keyList;
+>>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	}
 
 	private String generateUpdateStatement(String tableName, String[] keys, String[] fields) {
@@ -172,4 +252,15 @@ public class DataAccessor {
 		String keyList = String.join(" = ? AND ", keys) + " = ?";
 		return "UPDATE " + tableName + " SET " + fieldList + " WHERE " + keyList;
 	}
+<<<<<<< HEAD
+=======
+
+	private String generateInsertStatement(String tableName, String[] fields) {
+		String fieldList = String.join(",", fields);
+		String[] marks = new String[fields.length];
+		Arrays.fill(marks, "?");
+		String markList = String.join(",", marks);
+		return "INSERT INTO " + tableName + " (" + fieldList + ") VALUES (" + markList + ")";
+	}
+>>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 }

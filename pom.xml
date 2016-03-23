@@ -23,10 +23,13 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.38</version>
 		</dependency>
+<<<<<<< HEAD
 		<dependency>
 			<groupId>com.mchange</groupId>
 			<artifactId>c3p0</artifactId>
 			<version>0.9.5.2</version>
 		</dependency>
+=======
+>>>>>>> d1eb4ee41915731e646b70a22473302f9fa2efcf
 	</dependencies>
 </project>
